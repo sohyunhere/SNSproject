@@ -17,7 +17,6 @@ import com.google.firebase.auth.FirebaseUser;
 
 public class LoginActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
-    private static final String TAG = "SignUpActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,29 +26,25 @@ public class LoginActivity extends AppCompatActivity {
         // Initialize Firebase Auth
         mAuth = FirebaseAuth.getInstance();
 
-        findViewById(R.id.loginBtn).setOnClickListener(onClickListener);
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        // Check if user is signed in (non-null) and update UI accordingly.
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-
+        findViewById(R.id.checkBtn).setOnClickListener(onClickListener);
+        findViewById(R.id.gotoPasswordResetBtn).setOnClickListener(onClickListener);
     }
 
     View.OnClickListener onClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             switch (v.getId()){
-                case R.id.loginBtn:
-                    signUp();
+                case R.id.checkBtn:
+                    login();
+                    break;
+                case R.id.gotoPasswordResetBtn:
+                    myStartActivity(PasswordResetActivity.class);
                     break;
             }
         }
     };
 
-    private void signUp(){
+    private void login(){
         String email = ((EditText)findViewById(R.id.emailEditText)).getText().toString();
         String password = ((EditText)findViewById(R.id.passwordEditText)).getText().toString();
 
@@ -62,7 +57,7 @@ public class LoginActivity extends AppCompatActivity {
                                 // Sign in success, update UI with the signed-in user's information
                                 FirebaseUser user = mAuth.getCurrentUser();
                                 startToast("로그인에 성공하였습니다.");
-                                startMainActivity();
+                                myStartActivity(MainActivity.class);
                             } else {
                                 // If sign in fails, display a message to the user.
                                 if (task.getException() != null)
@@ -79,8 +74,8 @@ public class LoginActivity extends AppCompatActivity {
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
     }
 
-    private void startMainActivity(){
-        Intent intent = new Intent(this, MainActivity.class);
+    private void myStartActivity(Class c){
+        Intent intent = new Intent(this, c);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);   //로그인 성공후 뒤로가기 버튼을 클릭하면 앱 종료
         startActivity(intent);

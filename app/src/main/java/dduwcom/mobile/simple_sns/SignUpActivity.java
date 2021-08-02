@@ -27,16 +27,8 @@ public class SignUpActivity extends AppCompatActivity {
         // Initialize Firebase Auth
         mAuth = FirebaseAuth.getInstance();
 
-        findViewById(R.id.loginBtn).setOnClickListener(onClickListener);
+        findViewById(R.id.checkBtn).setOnClickListener(onClickListener);
         findViewById(R.id.gotoLoginBtn).setOnClickListener(onClickListener);
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        // Check if user is signed in (non-null) and update UI accordingly.
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-
     }
 
     @Override
@@ -51,11 +43,11 @@ public class SignUpActivity extends AppCompatActivity {
         @Override
         public void onClick(View v) {
             switch (v.getId()){
-                case R.id.loginBtn:
+                case R.id.checkBtn:
                     signUp();
                     break;
                 case R.id.gotoLoginBtn:
-                    startLoginActivity();
+                    myStartActivity(LoginActivity.class);
                     break;
             }
         }
@@ -75,6 +67,7 @@ public class SignUpActivity extends AppCompatActivity {
                                 if (task.isSuccessful()) {
                                     FirebaseUser user = mAuth.getCurrentUser();
                                     startToast("회원가입에 성공하였습니다.");
+                                    finish();
                                     //UI
                                 } else {
                                     // If sign in fails, display a message to the user.
@@ -96,8 +89,11 @@ public class SignUpActivity extends AppCompatActivity {
     private void startToast(String msg){
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
     }
-    private void startLoginActivity(){
-        Intent intent = new Intent(this, LoginActivity.class);
+
+    private void myStartActivity(Class c){
+        Intent intent = new Intent(this, c);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);   //로그인 성공후 뒤로가기 버튼을 클릭하면 앱 종료
         startActivity(intent);
     }
 }
