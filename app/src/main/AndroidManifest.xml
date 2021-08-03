@@ -24,7 +24,7 @@
         </activity>
         <activity android:name=".MainActivity"/>
         <activity android:name=".PasswordResetActivity"/>
-        <activity android:name=".MemberActivity"/>
+        <activity android:name=".MemberinitActivity"/>
     </application>
 
 </manifest>
