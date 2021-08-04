@@ -30,6 +30,8 @@ public class MainActivity extends AppCompatActivity {
         if(user == null) {
             myStartActivity(SignUpActivity.class);
         }else{
+            myStartActivity(MemberinitActivity.class);
+
             FirebaseFirestore db = FirebaseFirestore.getInstance();
             DocumentReference docRef = db.collection("users").document(user.getUid());
             docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
@@ -70,9 +72,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void myStartActivity(Class c){
         Intent intent = new Intent(this, c);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-//        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);   //로그인 성공후 뒤로가기 버튼을 클릭하면 앱 종료
+//        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+////        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+////        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);   //로그인 성공후 뒤로가기 버튼을 클릭하면 앱 종료
         startActivity(intent);
     }
 }
