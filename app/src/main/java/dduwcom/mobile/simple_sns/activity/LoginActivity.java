@@ -1,4 +1,4 @@
-package dduwcom.mobile.simple_sns;
+package dduwcom.mobile.simple_sns.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -14,6 +14,8 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+
+import dduwcom.mobile.simple_sns.R;
 
 public class LoginActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;

@@ -1,4 +1,4 @@
-package dduwcom.mobile.simple_sns;
+package dduwcom.mobile.simple_sns.activity;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -15,6 +15,8 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+
+import dduwcom.mobile.simple_sns.R;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";

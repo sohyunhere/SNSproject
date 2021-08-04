@@ -10,6 +10,13 @@ public class MemberInfo {
     private String address;
     private String photoUrl;
 
+
+    public MemberInfo(String name, String phoneNumber, String birthDay, String address){
+        this.name = name;
+        this.phoneNumber = phoneNumber;
+        this.birthDay = birthDay;
+        this.address = address;
+    }
     public MemberInfo(String name, String phoneNumber, String birthDay, String address, String photoUrl){
         this.name = name;
         this.phoneNumber = phoneNumber;
@@ -18,9 +25,7 @@ public class MemberInfo {
         this.photoUrl = photoUrl;
     }
 
-    public String getName() {
-        return name;
-    }
+    public String getName() {  return name; }
 
     public void setName(String name) {
         this.name = name;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package dduwcom.mobile.simple_sns;
+package dduwcom.mobile.simple_sns.activity;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -29,6 +29,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+
+import dduwcom.mobile.simple_sns.R;
+import dduwcom.mobile.simple_sns.fragment.Camera2BasicFragment;
 
 public class CameraActivity extends AppCompatActivity {
     private Camera2BasicFragment camera2BasicFragment;

@@ -1,4 +1,4 @@
-package dduwcom.mobile.simple_sns;
+package dduwcom.mobile.simple_sns.activity;
 
 import android.os.Bundle;
 import android.view.View;
@@ -11,6 +11,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+
+import dduwcom.mobile.simple_sns.R;
 
 public class PasswordResetActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
