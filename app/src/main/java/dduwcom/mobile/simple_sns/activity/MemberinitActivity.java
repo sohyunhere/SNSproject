@@ -4,8 +4,6 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -15,7 +13,6 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -33,8 +30,6 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -42,7 +37,6 @@ import java.io.InputStream;
 
 import dduwcom.mobile.simple_sns.MemberInfo;
 import dduwcom.mobile.simple_sns.R;
-import dduwcom.mobile.simple_sns.activity.CameraActivity;
 
 public class MemberinitActivity extends BasicActivity {
 
@@ -60,8 +54,8 @@ public class MemberinitActivity extends BasicActivity {
         profileImageView.setOnClickListener(onClickListener);
 
         findViewById(R.id.checkBtn).setOnClickListener(onClickListener);
-        findViewById(R.id.picture).setOnClickListener(onClickListener);
-        findViewById(R.id.gallery).setOnClickListener(onClickListener);
+        findViewById(R.id.imageModify).setOnClickListener(onClickListener);
+        findViewById(R.id.videoModify).setOnClickListener(onClickListener);
 
     }
 
@@ -79,10 +73,10 @@ public class MemberinitActivity extends BasicActivity {
                     else
                         cardView.setVisibility(View.VISIBLE);
                     break;
-                case R.id.picture:
+                case R.id.imageModify:
                     myStartActivity(CameraActivity.class);
                     break;
-                case R.id.gallery:
+                case R.id.videoModify:
 
                     if (ContextCompat.checkSelfPermission(
                             MemberinitActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) !=

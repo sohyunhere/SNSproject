@@ -99,13 +99,13 @@
             android:padding="5dp">
 
             <Button
-                android:id="@+id/picture"
+                android:id="@+id/imageModify"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="take a picture" />
 
             <Button
-                android:id="@+id/gallery"
+                android:id="@+id/videoModify"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="gallery" />

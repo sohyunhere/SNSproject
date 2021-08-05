@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -47,8 +48,10 @@ public class WritePostActivity extends BasicActivity {
     private FirebaseUser user;
     private ArrayList<String> pathList = new ArrayList<>();
     private LinearLayout parent;
-    private int pathCount;
-    private int successCount;
+    private int pathCount, successCount;
+    private RelativeLayout btnsBackgroundLayout;
+    private ImageView selectedImageView;
+    private EditText selectedEditText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,9 +59,25 @@ public class WritePostActivity extends BasicActivity {
         setContentView(R.layout.activity_write_post);
         parent = findViewById(R.id.contentsLayout);
 
+        btnsBackgroundLayout = findViewById(R.id.btnsBackgroundLayout);
+
+        btnsBackgroundLayout.setOnClickListener(onClickListener);
         findViewById(R.id.check).setOnClickListener(onClickListener);
         findViewById(R.id.image).setOnClickListener(onClickListener);
         findViewById(R.id.video).setOnClickListener(onClickListener);
+        findViewById(R.id.imageModify).setOnClickListener(onClickListener);
+        findViewById(R.id.videoModify).setOnClickListener(onClickListener);
+        findViewById(R.id.delete).setOnClickListener(onClickListener);
+
+        findViewById(R.id.contentsEditText).setOnFocusChangeListener(onFocusChangeListener);
+        findViewById(R.id.titleEditText).setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if(hasFocus){
+                    selectedEditText = null;
+                }
+            }
+        });
     }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -70,17 +89,48 @@ public class WritePostActivity extends BasicActivity {
                     pathList.add(profilePath);
 
                     ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+
+                    LinearLayout linearLayout = new LinearLayout(WritePostActivity.this);
+                    linearLayout.setLayoutParams(layoutParams);
+                    linearLayout.setOrientation(LinearLayout.VERTICAL);
+
+                    if(selectedEditText == null){
+                        parent.addView(linearLayout);
+                    }else{
+                        for(int i = 0; i<parent.getChildCount(); i++){
+                            if(parent.getChildAt(i) == selectedEditText.getParent()){
+                                parent.addView(linearLayout, i + 1);
+                                break;
+                            }
+                        }
+                    }
                     ImageView imageView = new ImageView(WritePostActivity.this);
                     imageView.setLayoutParams(layoutParams);
+                    imageView.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            btnsBackgroundLayout.setVisibility(View.VISIBLE);
+                            selectedImageView = (ImageView)v;
+                        }
+                    });
 
                     Glide.with(this).load(profilePath).override(1000).into(imageView);
-                    parent.addView(imageView);
+                    linearLayout.addView(imageView);
 
                     EditText editText = new EditText(WritePostActivity.this);
                     editText.setLayoutParams(layoutParams);
                     editText.setInputType(InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_CLASS_TEXT);
+                    editText.setHint("내용");
+                    editText.setOnFocusChangeListener(onFocusChangeListener);
 
-                    parent.addView(editText);
+                    linearLayout.addView(editText);
+                }
+                break;
+            case 1:
+                if(resultCode == Activity.RESULT_OK) {
+                    String profilePath = data.getStringExtra("profilePath");
+                    Glide.with(this).load(profilePath).override(1000).into(selectedImageView);
+
                 }
                 break;
         }
@@ -94,12 +144,44 @@ public class WritePostActivity extends BasicActivity {
                 case R.id.check:
                     storateUpload();
                     break;
+
                 case R.id.image:
-                    myStartActivity(GalleryActivity.class, "image");
+                    myStartActivity(GalleryActivity.class, "image", 0);
                     break;
+
                 case R.id.video:
-                    myStartActivity(GalleryActivity.class, "video");
+                    myStartActivity(GalleryActivity.class, "video", 0);
                     break;
+
+                case R.id.btnsBackgroundLayout:
+                    if(btnsBackgroundLayout.getVisibility() == View.VISIBLE){
+                        btnsBackgroundLayout.setVisibility(View.GONE);
+                    }
+                    break;
+
+                case R.id.imageModify:
+                    myStartActivity(GalleryActivity.class, "image", 1);
+                    btnsBackgroundLayout.setVisibility(View.GONE);
+                    break;
+
+                case R.id.videoModify:
+                    myStartActivity(GalleryActivity.class, "video", 1);
+                    btnsBackgroundLayout.setVisibility(View.GONE);
+                    break;
+
+                case R.id.delete:
+                    parent.removeView((View) selectedImageView.getParent());
+                    btnsBackgroundLayout.setVisibility(View.GONE);
+                    break;
+            }
+        }
+    };
+
+    View.OnFocusChangeListener onFocusChangeListener = new View.OnFocusChangeListener() {
+        @Override
+        public void onFocusChange(View v, boolean hasFocus) {
+            if(hasFocus){
+                selectedEditText = (EditText)v;
             }
         }
     };
@@ -107,96 +189,98 @@ public class WritePostActivity extends BasicActivity {
     private void storateUpload(){
         final String title = ((EditText)findViewById(R.id.titleEditText)).getText().toString();
 
-        FirebaseStorage storage = FirebaseStorage.getInstance();
-        StorageReference storageRef = storage.getReference();
-
         if(title.length() > 0){
-            ArrayList<String> contentsList = new ArrayList<String>();
-
+            final ArrayList<String> contentsList = new ArrayList<String>();
+            FirebaseStorage storage = FirebaseStorage.getInstance();
+            StorageReference storageRef = storage.getReference();
             user = FirebaseAuth.getInstance().getCurrentUser();
+            FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
+            final DocumentReference documentReference = firebaseFirestore.collection("posts").document();
 
             for(int i = 0; i < parent.getChildCount(); i++){
-                View view = parent.getChildAt(i);
-                if(view instanceof EditText){
-                    String text = ((EditText)view).getText().toString();
-                    if(text.length() > 0) {
-                        contentsList.add(text);
-                    }
-                }else{
-                    contentsList.add(pathList.get(pathCount));
+                LinearLayout linearLayout = (LinearLayout) parent.getChildAt(i);
 
-                    final StorageReference mountainImagesRef = storageRef.child("users/" + user.getUid() + "/" + pathCount + ".jpg");
+                for(int ii =0; ii < linearLayout.getChildCount(); ii++){
+                    View view = linearLayout.getChildAt(ii);
+                    if(view instanceof EditText){
+                        String text = ((EditText)view).getText().toString();
+                        if(text.length() > 0) {
+                            contentsList.add(text);
+                        }
+                    }else {
+                        contentsList.add(pathList.get(pathCount));
+                        final StorageReference mountainImagesRef = storageRef.child("posts/" + documentReference.getId() + "/" + pathCount + ".jpg");
+                        try {
+                            InputStream stream = new FileInputStream(new File(pathList.get(pathCount)));
 
-                    try {
-                        InputStream stream = new FileInputStream(new File(pathList.get(pathCount)));
+                            StorageMetadata metadata = new StorageMetadata.Builder().setCustomMetadata("index", "" + (contentsList.size() - 1)).build();
 
-                        StorageMetadata metadata = new StorageMetadata.Builder().setCustomMetadata("index", ""+(contentsList.size()-1)).build();
+                            UploadTask uploadTask = mountainImagesRef.putStream(stream, metadata);
+                            uploadTask.addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(Exception exception) {
+                                    // Handle unsuccessful uploads
+                                }
+                            }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                                @Override
+                                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                    final int index = Integer.parseInt(taskSnapshot.getMetadata().getCustomMetadata("index"));
 
-                        UploadTask uploadTask = mountainImagesRef.putStream(stream, metadata);
-                        uploadTask.addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(Exception exception) {
-                                // Handle unsuccessful uploads
-                            }
-                        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                            @Override
-                            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                               final int index = Integer.parseInt(taskSnapshot.getMetadata().getCustomMetadata("index"));
-
-                                mountainImagesRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                    @Override
-                                    public void onSuccess(Uri uri) {
-                                        contentsList.set(index, uri.toString());
-                                        successCount++;
-                                        if(pathList.size() == successCount){
-                                            //완료
-                                            WriteInfo writeInfo = new WriteInfo(title, contentsList, user.getUid(), new Date());
-                                            storeUpload(writeInfo);
+                                    mountainImagesRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                        @Override
+                                        public void onSuccess(Uri uri) {
+                                            contentsList.set(index, uri.toString());
+                                            successCount++;
+                                            if (pathList.size() == successCount) {
+                                                //완료
+                                                WriteInfo writeInfo = new WriteInfo(title, contentsList, user.getUid(), new Date());
+                                                storeUpload(documentReference, writeInfo);
+                                            }
                                         }
-                                    }
-                                });
+                                    });
 
-                            }
-                        });
-                    } catch (FileNotFoundException e) {
-                        Log.e("로그: ", "에러: " + e.toString());
+                                }
+                            });
+                        } catch (FileNotFoundException e) {
+                            Log.e("로그: ", "에러: " + e.toString());
+                        }
+                        pathCount++;
                     }
-                    pathCount++;
                 }
             }
         }else{
-            startToast("게시물 내용을 입력해주세요");
+            startToast("게시물 제목을 입력해주세요");
         }
     }
 
-    private void storeUpload(WriteInfo writeInfo){
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection("posts").add(writeInfo)
-                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                    @Override
-                    public void onSuccess(DocumentReference documentReference) {
-                        startToast("게시물 등록 성공");
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure( Exception e) {
-                        startToast("게시물 등록 실패");
-                    }
-                });
+    private void storeUpload(DocumentReference documentReference, WriteInfo writeInfo){
+        documentReference.set(writeInfo)
+            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void aVoid) {
+                    Log.d(TAG, "DocumentSnapshot successfully written!");
+                    finish();
+                }
+            })
+            .addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Log.w(TAG, "Error writing document", e);
+                }
+            });
     }
 
     private void startToast(String msg){
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
     }
 
-    private void myStartActivity(Class c, String media){
+    private void myStartActivity(Class c, String media, int requestCode){
         Intent intent = new Intent(this, c);
         intent.putExtra("media", media);
 
 //        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 ////        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
 ////        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);   //로그인 성공후 뒤로가기 버튼을 클릭하면 앱 종료
-        startActivityForResult(intent, 0);
+        startActivityForResult(intent, requestCode);
     }
 }
