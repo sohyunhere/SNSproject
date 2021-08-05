@@ -18,7 +18,7 @@ import com.google.firebase.auth.FirebaseUser;
 import dduwcom.mobile.simple_sns.R;
 import dduwcom.mobile.simple_sns.activity.LoginActivity;
 
-public class SignUpActivity extends AppCompatActivity {
+public class SignUpActivity extends BasicActivity {
     private FirebaseAuth mAuth;
     private static final String TAG = "SignUpActivity";
 

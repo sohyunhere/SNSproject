@@ -14,7 +14,7 @@ import com.google.firebase.auth.FirebaseAuth;
 
 import dduwcom.mobile.simple_sns.R;
 
-public class PasswordResetActivity extends AppCompatActivity {
+public class PasswordResetActivity extends BasicActivity {
     private FirebaseAuth mAuth;
     private static final String TAG = "PasswordResetActivity";
 

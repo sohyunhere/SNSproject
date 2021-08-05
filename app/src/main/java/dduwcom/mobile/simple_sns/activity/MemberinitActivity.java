@@ -20,6 +20,7 @@ import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -43,7 +44,7 @@ import dduwcom.mobile.simple_sns.MemberInfo;
 import dduwcom.mobile.simple_sns.R;
 import dduwcom.mobile.simple_sns.activity.CameraActivity;
 
-public class MemberinitActivity extends AppCompatActivity {
+public class MemberinitActivity extends BasicActivity {
 
     private static final String TAG = "MemberinitActivity";
     private ImageView profileImageView;
@@ -122,8 +123,8 @@ public class MemberinitActivity extends AppCompatActivity {
                 if(resultCode == Activity.RESULT_OK){
                     profilePath = data.getStringExtra("profilePath");
                     Log.e("로그: ", "profilePath" + profilePath);
-                    Bitmap bmp = BitmapFactory.decodeFile(profilePath);
-                    profileImageView.setImageBitmap(bmp);
+
+                    Glide.with(this).load(profilePath).centerCrop().override(500).into(profileImageView);
                 }
                 break;
         }

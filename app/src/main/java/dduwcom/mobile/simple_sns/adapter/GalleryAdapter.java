@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import java.util.ArrayList;
 import dduwcom.mobile.simple_sns.R;
+import dduwcom.mobile.simple_sns.activity.GalleryActivity;
 
 
 public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryViewHolder> {
@@ -38,23 +39,24 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryV
     public GalleryAdapter.GalleryViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         CardView cardView = (CardView) LayoutInflater.from(parent.getContext()).inflate(R.layout.item_gallery, parent, false);
 
-        return new GalleryViewHolder(cardView);
+        final GalleryViewHolder galleryViewHolder = new GalleryViewHolder(cardView);
+        cardView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent resultIntent = new Intent();
+                resultIntent.putExtra("profilePath", mDataset.get(galleryViewHolder.getAdapterPosition()));
+                activity.setResult(Activity.RESULT_OK, resultIntent);
+
+                activity.finish();
+            }
+        });
+        return galleryViewHolder;
     }
 
     @Override
     public void onBindViewHolder(GalleryViewHolder holder, int position) {
         CardView cardView = holder.cardView;
 
-        cardView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent resultIntent = new Intent();
-                resultIntent.putExtra("profilePath", mDataset.get(holder.getAdapterPosition()));
-                activity.setResult(Activity.RESULT_OK, resultIntent);
-
-                activity.finish();
-            }
-        });
         ImageView imageView = cardView.findViewById(R.id.imageView);
 
         Glide.with(activity).load(mDataset.get(position)).centerCrop().override(500).into(imageView);

@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import dduwcom.mobile.simple_sns.R;
 import dduwcom.mobile.simple_sns.adapter.GalleryAdapter;
 
-public class GalleryActivity extends AppCompatActivity {
+public class GalleryActivity extends BasicActivity {
     private RecyclerView recyclerView;
     private RecyclerView.Adapter mAdapter;
 

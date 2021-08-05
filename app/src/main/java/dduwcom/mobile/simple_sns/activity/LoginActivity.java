@@ -17,7 +17,7 @@ import com.google.firebase.auth.FirebaseUser;
 
 import dduwcom.mobile.simple_sns.R;
 
-public class LoginActivity extends AppCompatActivity {
+public class LoginActivity extends BasicActivity {
     private FirebaseAuth mAuth;
 
     @Override

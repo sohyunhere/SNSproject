@@ -33,7 +33,7 @@ import java.nio.ByteBuffer;
 import dduwcom.mobile.simple_sns.R;
 import dduwcom.mobile.simple_sns.fragment.Camera2BasicFragment;
 
-public class CameraActivity extends AppCompatActivity {
+public class CameraActivity extends BasicActivity {
     private Camera2BasicFragment camera2BasicFragment;
 
     /**
