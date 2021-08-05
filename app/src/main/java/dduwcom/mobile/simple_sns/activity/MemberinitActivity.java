@@ -86,13 +86,10 @@ public class MemberinitActivity extends AppCompatActivity {
                     if (ContextCompat.checkSelfPermission(
                             MemberinitActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) !=
                             PackageManager.PERMISSION_GRANTED) {
+                        ActivityCompat.requestPermissions(MemberinitActivity.this, new String[] {Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
 
                         if (ActivityCompat.shouldShowRequestPermissionRationale(MemberinitActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
-                            ActivityCompat.requestPermissions(MemberinitActivity.this, new String[] {Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
-
                         } else {
-                            ActivityCompat.requestPermissions(MemberinitActivity.this, new String[] {Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
-
                             startToast("권한을 허용해주세요.");
                         }
 

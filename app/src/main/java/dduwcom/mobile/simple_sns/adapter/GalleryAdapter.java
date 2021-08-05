@@ -1,20 +1,24 @@
 package dduwcom.mobile.simple_sns.adapter;
 
+import android.app.Activity;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
-
+import android.widget.ImageView;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
-
-import org.w3c.dom.Text;
-
+import com.bumptech.glide.Glide;
+import java.util.ArrayList;
 import dduwcom.mobile.simple_sns.R;
 
 
 public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryViewHolder> {
 
-    private String mDataset[];
+    private ArrayList<String> mDataset;
+    private Activity activity;
 
     public class GalleryViewHolder extends RecyclerView.ViewHolder{
 
@@ -25,26 +29,39 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryV
         }
     }
 
-    public GalleryAdapter(String[] myDataset){
+    public GalleryAdapter(Activity activity, ArrayList<String> myDataset){
         mDataset = myDataset;
+        this.activity = activity;
     }
 
     @Override
     public GalleryAdapter.GalleryViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        CardView v = (CardView) LayoutInflater.from(parent.getContext()).inflate(R.layout.item_gallery, parent, false);
+        CardView cardView = (CardView) LayoutInflater.from(parent.getContext()).inflate(R.layout.item_gallery, parent, false);
 
-        GalleryViewHolder vh = new GalleryViewHolder(v);
-        return vh;
+        return new GalleryViewHolder(cardView);
     }
 
     @Override
     public void onBindViewHolder(GalleryViewHolder holder, int position) {
-        TextView textView = holder.cardView.findViewById(R.id.textView2);
-        textView.setText(mDataset[position]);
+        CardView cardView = holder.cardView;
+
+        cardView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent resultIntent = new Intent();
+                resultIntent.putExtra("profilePath", mDataset.get(holder.getAdapterPosition()));
+                activity.setResult(Activity.RESULT_OK, resultIntent);
+
+                activity.finish();
+            }
+        });
+        ImageView imageView = cardView.findViewById(R.id.imageView);
+
+        Glide.with(activity).load(mDataset.get(position)).centerCrop().override(500).into(imageView);
     }
 
     @Override
     public int getItemCount() {
-        return mDataset.length;
+        return mDataset.size();
     }
 }
