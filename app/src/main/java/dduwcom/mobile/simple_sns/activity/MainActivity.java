@@ -1,11 +1,10 @@
 package dduwcom.mobile.simple_sns.activity;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
-import android.app.Activity;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -17,8 +16,15 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
+import java.util.ArrayList;
+import java.util.Date;
+
+import dduwcom.mobile.simple_sns.PostInfo;
 import dduwcom.mobile.simple_sns.R;
+import dduwcom.mobile.simple_sns.adapter.MainAdapter;
 
 public class MainActivity extends BasicActivity {
     private static final String TAG = "MainActivity";
@@ -30,18 +36,18 @@ public class MainActivity extends BasicActivity {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
         Log.d(TAG, user.toString());
-        if(user == null) {
+        if (user == null) {
             myStartActivity(SignUpActivity.class);
-        }else{
+        } else {
 
             FirebaseFirestore db = FirebaseFirestore.getInstance();
             DocumentReference docRef = db.collection("users").document(user.getUid());
             docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                 @Override
-                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                public void onComplete(Task<DocumentSnapshot> task) {
                     if (task.isSuccessful()) {
                         DocumentSnapshot document = task.getResult();
-                        if(document != null){
+                        if (document != null) {
                             if (document.exists()) {
                                 Log.d(TAG, "DocumentSnapshot data: " + document.getData());
 
@@ -56,19 +62,49 @@ public class MainActivity extends BasicActivity {
                     }
                 }
             });
+
+            db.collection("posts")
+                    .get()
+                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                            if (task.isSuccessful()) {
+                                final ArrayList<PostInfo> postList = new ArrayList<>();
+                                for (QueryDocumentSnapshot document : task.getResult()) {
+                                    Log.d(TAG, document.getId() + " => " + document.getData());
+                                    postList.add(new PostInfo(document.getData().get("title").toString(),
+                                            (ArrayList<String>) document.getData().get("contents"),
+                                            document.getData().get("publisher").toString(),
+                                            new Date(document.getDate("createdAt").getTime())));
+                                }
+
+                                RecyclerView recyclerView = findViewById(R.id.recyclerView);
+                                recyclerView.setHasFixedSize(true);
+
+                                recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+
+                                RecyclerView.Adapter mAdapter = new MainAdapter(MainActivity.this, postList);
+                                recyclerView.setAdapter(mAdapter);
+                            } else {
+                                Log.d(TAG, "Error getting documents: ", task.getException());
+                            }
+                        }
+                    });
+
         }
-        findViewById(R.id.logoutBtn).setOnClickListener(onClickListener);
+
+//        findViewById(R.id.logoutBtn).setOnClickListener(onClickListener);
         findViewById(R.id.floatingActionButton).setOnClickListener(onClickListener);
     }
 
     View.OnClickListener onClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            switch (v.getId()){
-                case R.id.logoutBtn:
-                    FirebaseAuth.getInstance().signOut();
-                    myStartActivity(SignUpActivity.class);
-                    break;
+            switch (v.getId()) {
+//                case R.id.logoutBtn:
+//                    FirebaseAuth.getInstance().signOut();
+//                    myStartActivity(SignUpActivity.class);
+//                    break;
                 case R.id.floatingActionButton:
                     myStartActivity(WritePostActivity.class);
                     break;
@@ -76,7 +112,7 @@ public class MainActivity extends BasicActivity {
         }
     };
 
-    private void myStartActivity(Class c){
+    private void myStartActivity(Class c) {
         Intent intent = new Intent(this, c);
 //        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 ////        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);

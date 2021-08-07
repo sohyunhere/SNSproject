@@ -18,11 +18,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 
 import com.bumptech.glide.Glide;
-import com.google.android.gms.tasks.Continuation;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
@@ -39,9 +36,8 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 
-import dduwcom.mobile.simple_sns.MemberInfo;
 import dduwcom.mobile.simple_sns.R;
-import dduwcom.mobile.simple_sns.WriteInfo;
+import dduwcom.mobile.simple_sns.PostInfo;
 
 public class WritePostActivity extends BasicActivity {
     private static final String TAG = "WritePostActivity";
@@ -52,6 +48,7 @@ public class WritePostActivity extends BasicActivity {
     private RelativeLayout btnsBackgroundLayout;
     private ImageView selectedImageView;
     private EditText selectedEditText;
+    private RelativeLayout loaderLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +57,7 @@ public class WritePostActivity extends BasicActivity {
         parent = findViewById(R.id.contentsLayout);
 
         btnsBackgroundLayout = findViewById(R.id.btnsBackgroundLayout);
+        loaderLayout.findViewById(R.id.loaderLayout);
 
         btnsBackgroundLayout.setOnClickListener(onClickListener);
         findViewById(R.id.check).setOnClickListener(onClickListener);
@@ -142,7 +140,7 @@ public class WritePostActivity extends BasicActivity {
         public void onClick(View v) {
             switch (v.getId()){
                 case R.id.check:
-                    storateUpload();
+                    storageUpload();
                     break;
 
                 case R.id.image:
@@ -186,10 +184,11 @@ public class WritePostActivity extends BasicActivity {
         }
     };
 
-    private void storateUpload(){
+    private void storageUpload(){
         final String title = ((EditText)findViewById(R.id.titleEditText)).getText().toString();
 
         if(title.length() > 0){
+            loaderLayout.setVisibility(View.VISIBLE);
             final ArrayList<String> contentsList = new ArrayList<String>();
             FirebaseStorage storage = FirebaseStorage.getInstance();
             StorageReference storageRef = storage.getReference();
@@ -233,8 +232,8 @@ public class WritePostActivity extends BasicActivity {
                                             successCount++;
                                             if (pathList.size() == successCount) {
                                                 //완료
-                                                WriteInfo writeInfo = new WriteInfo(title, contentsList, user.getUid(), new Date());
-                                                storeUpload(documentReference, writeInfo);
+                                                PostInfo postInfo = new PostInfo(title, contentsList, user.getUid(), new Date());
+                                                storeUpload(documentReference, postInfo);
                                             }
                                         }
                                     });
@@ -248,17 +247,22 @@ public class WritePostActivity extends BasicActivity {
                     }
                 }
             }
+            if(pathList.size() == 0){
+                PostInfo postInfo = new PostInfo(title, contentsList, user.getUid(), new Date());
+                storeUpload(documentReference, postInfo);
+            }
         }else{
             startToast("게시물 제목을 입력해주세요");
         }
     }
 
-    private void storeUpload(DocumentReference documentReference, WriteInfo writeInfo){
-        documentReference.set(writeInfo)
+    private void storeUpload(DocumentReference documentReference, PostInfo postInfo){
+        documentReference.set(postInfo)
             .addOnSuccessListener(new OnSuccessListener<Void>() {
                 @Override
                 public void onSuccess(Void aVoid) {
                     Log.d(TAG, "DocumentSnapshot successfully written!");
+                    loaderLayout.setVisibility(View.GONE);
                     finish();
                 }
             })
@@ -266,6 +270,7 @@ public class WritePostActivity extends BasicActivity {
                 @Override
                 public void onFailure(@NonNull Exception e) {
                     Log.w(TAG, "Error writing document", e);
+                    loaderLayout.setVisibility(View.GONE);
                 }
             });
     }

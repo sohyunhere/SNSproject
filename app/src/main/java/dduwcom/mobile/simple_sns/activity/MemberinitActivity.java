@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -44,12 +45,14 @@ public class MemberinitActivity extends BasicActivity {
     private ImageView profileImageView;
     private String profilePath;
     private FirebaseUser user;
+    private RelativeLayout loaderLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_member_init);
 
+        loaderLayout.findViewById(R.id.loaderLayout);
         profileImageView = findViewById(R.id.profileImageView);
         profileImageView.setOnClickListener(onClickListener);
 
@@ -64,7 +67,7 @@ public class MemberinitActivity extends BasicActivity {
         public void onClick(View v) {
             switch (v.getId()) {
                 case R.id.checkBtn:
-                    profileUpdate();
+                    storageUploader();
                     break;
                 case R.id.profileImageView:
                     CardView cardView = findViewById(R.id.btnsCardView);
@@ -124,7 +127,7 @@ public class MemberinitActivity extends BasicActivity {
         }
     }
 
-    private void profileUpdate() {
+    private void storageUploader() {
         final String name = ((EditText) findViewById(R.id.nameEditText)).getText().toString();
         final String phoneNumber = ((EditText) findViewById(R.id.phoneNumberEditText)).getText().toString();
         final String birthDay = ((EditText) findViewById(R.id.birthDayEditText)).getText().toString();
@@ -132,6 +135,7 @@ public class MemberinitActivity extends BasicActivity {
 
         if (name.length() > 0 && phoneNumber.length() > 9 && birthDay.length() > 5 && address.length() > 0) {
 
+            loaderLayout.setVisibility(View.VISIBLE);
             FirebaseStorage storage = FirebaseStorage.getInstance();
 
             // Create a storage reference from our app
@@ -142,7 +146,7 @@ public class MemberinitActivity extends BasicActivity {
 
             if(profilePath == null){
                 MemberInfo memberInfo = new MemberInfo(name, phoneNumber, birthDay, address);
-                uploader(memberInfo);
+                storeUploader(memberInfo);
             }
             else{
                 try {
@@ -163,7 +167,7 @@ public class MemberinitActivity extends BasicActivity {
                                 Uri downloadUri = task.getResult();
 
                                 MemberInfo memberInfo = new MemberInfo(name, phoneNumber, birthDay, address, downloadUri.toString());
-                                uploader(memberInfo);
+                                storeUploader(memberInfo);
 
                             } else {
                                 startToast("회원정보를 보내는데 실패하였습니다.");
@@ -180,13 +184,14 @@ public class MemberinitActivity extends BasicActivity {
         }
     }
 
-    private void uploader(MemberInfo memberInfo){
+    private void storeUploader(MemberInfo memberInfo){
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection("users").document(user.getUid()).set(memberInfo)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
                         startToast("회원정보 등록을 성공하였습니다.");
+                        loaderLayout.setVisibility(View.GONE);
                         finish();
                     }
                 })
@@ -194,6 +199,7 @@ public class MemberinitActivity extends BasicActivity {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         startToast("회원정보 등록에 실패하였습니다.");
+                        loaderLayout.setVisibility(View.GONE);
                         Log.w(TAG, "Error writing document", e);
                     }
                 });
