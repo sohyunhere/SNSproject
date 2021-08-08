@@ -100,7 +100,8 @@ public class MainActivity extends BasicActivity {
                                     postList.add(new PostInfo(document.getData().get("title").toString(),
                                             (ArrayList<String>) document.getData().get("contents"),
                                             document.getData().get("publisher").toString(),
-                                            new Date(document.getDate("createdAt").getTime())));
+                                            new Date(document.getDate("createdAt").getTime()),
+                                            document.getId()));
                                 }
                                 RecyclerView.Adapter mAdapter = new MainAdapter(MainActivity.this, postList);
                                 recyclerView.setAdapter(mAdapter);
