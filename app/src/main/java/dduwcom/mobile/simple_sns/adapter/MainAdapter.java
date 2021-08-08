@@ -28,6 +28,7 @@ import java.util.Locale;
 
 import dduwcom.mobile.simple_sns.PostInfo;
 import dduwcom.mobile.simple_sns.R;
+import dduwcom.mobile.simple_sns.listener.OnPostListener;
 
 
 public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder> {
@@ -35,37 +36,16 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
     private ArrayList<PostInfo> mDataset;
     private Activity activity;
     private FirebaseFirestore firebaseFirestore;
+    private OnPostListener onPostListener;
 
     static class MainViewHolder extends RecyclerView.ViewHolder {
 
         public CardView cardView;
 
-        public MainViewHolder(Activity activity, CardView v, PostInfo postInfo) {
+        public MainViewHolder(CardView v) {
             super(v);
             cardView = v;
 
-            LinearLayout contentsLayout = cardView.findViewById(R.id.contentsLayout);
-            ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-            ArrayList<String> contentsList = postInfo.getContents();
-
-
-            if (contentsLayout.getChildCount() == 0) {
-                for (int i = 0; i < contentsList.size(); i++) {
-                    String contents = contentsList.get(i);
-                    if (Patterns.WEB_URL.matcher(contents).matches()) {
-                        ImageView imageView = new ImageView(activity);
-                        imageView.setLayoutParams(layoutParams);
-                        imageView.setAdjustViewBounds(true);
-                        imageView.setScaleType(ImageView.ScaleType.FIT_XY);
-                        contentsLayout.addView(imageView);
-
-                    } else {
-                        TextView textView = new TextView(activity);
-                        textView.setLayoutParams(layoutParams);
-                        contentsLayout.addView(textView);
-                    }
-                }
-            }
         }
     }
 
@@ -73,6 +53,10 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
         mDataset = myDataset;
         this.activity = activity;
         firebaseFirestore = FirebaseFirestore.getInstance();
+    }
+
+    public void setOnPostListener(OnPostListener onPostListener){
+        this.onPostListener = onPostListener;
     }
 
     @Override
@@ -84,7 +68,7 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
     public MainViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         CardView cardView = (CardView) LayoutInflater.from(parent.getContext()).inflate(R.layout.item_post, parent, false);
 
-        final MainViewHolder mainViewHolder = new MainViewHolder(activity, cardView, mDataset.get(viewType));
+        final MainViewHolder mainViewHolder = new MainViewHolder(cardView);
         cardView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -112,16 +96,33 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
         createdAtTextView.setText(new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(mDataset.get(position).getCreatedAt()));
 
         LinearLayout contentsLayout = cardView.findViewById(R.id.contentsLayout);
+
+        ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         ArrayList<String> contentsList = mDataset.get(position).getContents();
 
-        for (int i = 0; i < contentsList.size(); i++) {
-            String contents = contentsList.get(i);
-            if (Patterns.WEB_URL.matcher(contents).matches()) {
-                Glide.with(activity).load(contents).override(1000).thumbnail(0.1f).into((ImageView)contentsLayout.getChildAt(i));
-            } else {
-                ((TextView)contentsLayout.getChildAt(i)).setText(contents);
+        if(contentsLayout.getTag() == null || !contentsLayout.getTag().equals(contentsList)){
+            contentsLayout.removeAllViews();
+            if(contentsList.size() > 0){
+                for (int i = 0; i < contentsList.size(); i++) {
+                    String contents = contentsList.get(i);
+                    if (Patterns.WEB_URL.matcher(contents).matches()) {
+                        ImageView imageView = new ImageView(activity);
+                        imageView.setLayoutParams(layoutParams);
+                        imageView.setAdjustViewBounds(true);
+                        imageView.setScaleType(ImageView.ScaleType.FIT_XY);
+                        contentsLayout.addView(imageView);
+
+                        Glide.with(activity).load(contents).override(1000).thumbnail(0.1f).into(imageView);
+                    } else {
+                        TextView textView = new TextView(activity);
+                        textView.setLayoutParams(layoutParams);
+                        contentsLayout.addView(textView);
+                        textView.setText(contents);
+                    }
+                }
             }
         }
+
     }
 
     @Override
@@ -129,31 +130,18 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
         return mDataset.size();
     }
 
-    private void showPopup(View v, int position) {
+    private void showPopup(View v, final int position) {
         PopupMenu popup = new PopupMenu(activity, v);
         popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
+                String id = mDataset.get(position).getId();
                 switch (item.getItemId()) {
                     case R.id.modify:
-                        //archive(item);
+                        onPostListener.onModify(id);
                         return true;
                     case R.id.delete:
-
-                        firebaseFirestore.collection("posts").document(mDataset.get(position).getId())
-                                .delete()
-                                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                    @Override
-                                    public void onSuccess(Void aVoid) {
-                                        startToast("게시글을 삭제하였습니다.");
-                                    }
-                                })
-                                .addOnFailureListener(new OnFailureListener() {
-                                    @Override
-                                    public void onFailure( Exception e) {
-                                        startToast("게시글 삭제를 실패하였습니다.");
-                                    }
-                                });
+                        onPostListener.onDelete(id);
                         return true;
                     default:
                         return false;
@@ -165,7 +153,4 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
         popup.show();
     }
 
-    private void startToast(String msg){
-        Toast.makeText(activity, msg, Toast.LENGTH_SHORT).show();
-    }
 }

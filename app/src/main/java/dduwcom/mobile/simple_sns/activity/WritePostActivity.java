@@ -194,7 +194,16 @@ public class WritePostActivity extends BasicActivity {
             StorageReference storageRef = storage.getReference();
             user = FirebaseAuth.getInstance().getCurrentUser();
             FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
-            final DocumentReference documentReference = firebaseFirestore.collection("posts").document();
+
+            String id = getIntent().getStringExtra("id");
+            DocumentReference dr;
+
+            if(id == null){
+                dr = firebaseFirestore.collection("posts").document();
+            }else{
+                dr = firebaseFirestore.collection("posts").document(id);
+            }
+            final DocumentReference documentReference = dr;
 
             for(int i = 0; i < parent.getChildCount(); i++){
                 LinearLayout linearLayout = (LinearLayout) parent.getChildAt(i);
