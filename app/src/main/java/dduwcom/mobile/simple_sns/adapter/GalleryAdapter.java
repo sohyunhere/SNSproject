@@ -21,7 +21,7 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryV
     private ArrayList<String> mDataset;
     private Activity activity;
 
-    public class GalleryViewHolder extends RecyclerView.ViewHolder{
+    static class GalleryViewHolder extends RecyclerView.ViewHolder{
 
         public CardView cardView;
         public GalleryViewHolder(CardView v){

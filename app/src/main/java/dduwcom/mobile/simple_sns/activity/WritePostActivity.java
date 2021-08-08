@@ -57,7 +57,7 @@ public class WritePostActivity extends BasicActivity {
         parent = findViewById(R.id.contentsLayout);
 
         btnsBackgroundLayout = findViewById(R.id.btnsBackgroundLayout);
-        loaderLayout.findViewById(R.id.loaderLayout);
+        loaderLayout = findViewById(R.id.loaderLayout);
 
         btnsBackgroundLayout.setOnClickListener(onClickListener);
         findViewById(R.id.check).setOnClickListener(onClickListener);
@@ -208,7 +208,8 @@ public class WritePostActivity extends BasicActivity {
                         }
                     }else {
                         contentsList.add(pathList.get(pathCount));
-                        final StorageReference mountainImagesRef = storageRef.child("posts/" + documentReference.getId() + "/" + pathCount + ".jpg");
+                        String[] pathArray = pathList.get(pathCount).split("\\.");
+                        final StorageReference mountainImagesRef = storageRef.child("posts/" + documentReference.getId() + "/" + pathCount + "." + pathArray[pathArray.length - 1]);
                         try {
                             InputStream stream = new FileInputStream(new File(pathList.get(pathCount)));
 
