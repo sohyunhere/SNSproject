@@ -8,7 +8,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.widget.Toast;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -19,6 +18,8 @@ import java.util.ArrayList;
 
 import dduwcom.mobile.simple_sns.R;
 import dduwcom.mobile.simple_sns.adapter.GalleryAdapter;
+
+import static dduwcom.mobile.simple_sns.Util.showToast;
 
 public class GalleryActivity extends BasicActivity {
 
@@ -34,7 +35,7 @@ public class GalleryActivity extends BasicActivity {
 
             if (ActivityCompat.shouldShowRequestPermissionRationale(GalleryActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
             } else {
-                startToast("권한을 허용해주세요.");
+                showToast(GalleryActivity.this, "권한을 허용해주세요.");
             }
 
         }else{
@@ -52,7 +53,7 @@ public class GalleryActivity extends BasicActivity {
                     recyclerinit();
                 } else {
                     finish();
-                    startToast("권한을 허용해주세요.");
+                    showToast(GalleryActivity.this, "권한을 허용해주세요.");
                 }
         }
     }
@@ -101,9 +102,6 @@ public class GalleryActivity extends BasicActivity {
             listOfAllImages.add(PathOfImage);
         }
         return listOfAllImages;
-    }
-    private void startToast(String msg){
-        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
     }
 
 }

@@ -1,8 +1,9 @@
 package dduwcom.mobile.simple_sns.adapter;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Color;
-import android.util.Patterns;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -11,25 +12,20 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
-
 import androidx.appcompat.widget.PopupMenu;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.bumptech.glide.Glide;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.storage.FirebaseStorage;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Locale;
 
 import dduwcom.mobile.simple_sns.PostInfo;
 import dduwcom.mobile.simple_sns.R;
+import dduwcom.mobile.simple_sns.activity.PostActivity;
 import dduwcom.mobile.simple_sns.listener.OnPostListener;
+
+import static dduwcom.mobile.simple_sns.Util.isStorageUri;
 
 
 public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder> {
@@ -71,7 +67,9 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
         cardView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                Intent intent = new Intent(activity, PostActivity.class);
+                intent.putExtra("postInfo", mDataset.get(mainViewHolder.getAdapterPosition()));
+                activity.startActivity(intent);
             }
         });
         cardView.findViewById(R.id.menu).setOnClickListener(new View.OnClickListener() {
@@ -114,7 +112,7 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
                 }
 
                 String contents = contentsList.get(i);
-                if (Patterns.WEB_URL.matcher(contents).matches() && contents.contains("https://firebasestorage.googleapis.com/v0/b/simple-snsproject.appspot.com/o/post")) {
+                if (isStorageUri(contents)) {
                     ImageView imageView = new ImageView(activity);
                     imageView.setLayoutParams(layoutParams);
                     imageView.setAdjustViewBounds(true);

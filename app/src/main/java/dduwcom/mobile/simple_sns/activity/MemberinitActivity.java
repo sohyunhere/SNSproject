@@ -1,9 +1,8 @@
 package dduwcom.mobile.simple_sns.activity;
 
-import android.Manifest;
+
 import android.app.Activity;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -11,12 +10,9 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 
 import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.Continuation;
@@ -38,6 +34,8 @@ import java.io.InputStream;
 
 import dduwcom.mobile.simple_sns.MemberInfo;
 import dduwcom.mobile.simple_sns.R;
+
+import static dduwcom.mobile.simple_sns.Util.showToast;
 
 public class MemberinitActivity extends BasicActivity {
 
@@ -144,7 +142,7 @@ public class MemberinitActivity extends BasicActivity {
                                 storeUploader(memberInfo);
 
                             } else {
-                                startToast("회원정보를 보내는데 실패하였습니다.");
+                                showToast(MemberinitActivity.this, "회원정보를 보내는데 실패하였습니다.");
                             }
                         }
                     });
@@ -154,7 +152,7 @@ public class MemberinitActivity extends BasicActivity {
             }
 
         } else {
-            startToast("회원정보를 입력해주세요.");
+            showToast(MemberinitActivity.this, "회원정보를 입력해주세요.");
         }
     }
 
@@ -164,7 +162,8 @@ public class MemberinitActivity extends BasicActivity {
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        startToast("회원정보 등록을 성공하였습니다.");
+
+                        showToast(MemberinitActivity.this, "회원정보 등록을 성공하였습니다.");
                         loaderLayout.setVisibility(View.GONE);
                         finish();
                     }
@@ -172,14 +171,11 @@ public class MemberinitActivity extends BasicActivity {
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        startToast("회원정보 등록에 실패하였습니다.");
+                        showToast(MemberinitActivity.this, "회원정보 등록에 실패하였습니다.");
                         loaderLayout.setVisibility(View.GONE);
                         Log.w(TAG, "Error writing document", e);
                     }
                 });
-    }
-    private void startToast(String msg){
-        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
     }
 
     @Override
