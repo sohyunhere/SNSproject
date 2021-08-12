@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import dduwcom.mobile.simple_sns.R;
 import dduwcom.mobile.simple_sns.activity.GalleryActivity;
 
+import static dduwcom.mobile.simple_sns.Util.INTENT_PATH;
+
 
 public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryViewHolder> {
 
@@ -44,7 +46,7 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryV
             @Override
             public void onClick(View v) {
                 Intent resultIntent = new Intent();
-                resultIntent.putExtra("profilePath", mDataset.get(galleryViewHolder.getAdapterPosition()));
+                resultIntent.putExtra(INTENT_PATH, mDataset.get(galleryViewHolder.getAdapterPosition()));
                 activity.setResult(Activity.RESULT_OK, resultIntent);
 
                 activity.finish();

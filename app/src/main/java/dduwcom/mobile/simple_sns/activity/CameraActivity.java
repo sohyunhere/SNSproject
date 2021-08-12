@@ -31,21 +31,16 @@ import java.nio.ByteBuffer;
 import dduwcom.mobile.simple_sns.R;
 import dduwcom.mobile.simple_sns.fragment.Camera2BasicFragment;
 
+import static dduwcom.mobile.simple_sns.Util.INTENT_PATH;
+
 public class CameraActivity extends BasicActivity {
     private Camera2BasicFragment camera2BasicFragment;
 
-    /**
-     * This a callback object for the {@link ImageReader}. "onImageAvailable" will be called when a
-     * still image is ready to be saved.
-     */
     private final ImageReader.OnImageAvailableListener mOnImageAvailableListener
             = new ImageReader.OnImageAvailableListener() {
 
         @Override
         public void onImageAvailable(ImageReader reader) {
-            //mBackgroundHandler.post(new Camera2BasicFragment.ImageUpLoader(reader.acquireNextImage()));
-            Log.e("로그: ", "캡쳐");
-
 
             Image mImage = reader.acquireNextImage();
             File mFile = new File(getExternalFilesDir(null), "profileImage.jpg");
@@ -69,9 +64,9 @@ public class CameraActivity extends BasicActivity {
                     }
                 }
             }
-            Intent resultIntent = new Intent();
-            resultIntent.putExtra("profilePath", mFile.toString());
-            setResult(Activity.RESULT_OK, resultIntent);
+            Intent intent = new Intent();
+            intent.putExtra(INTENT_PATH, mFile.toString());
+            setResult(Activity.RESULT_OK, intent);
 
             camera2BasicFragment.closeCamera();
             finish();

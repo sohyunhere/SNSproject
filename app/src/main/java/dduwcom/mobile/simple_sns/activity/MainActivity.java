@@ -56,7 +56,6 @@ public class MainActivity extends BasicActivity {
         FirebaseStorage storage = FirebaseStorage.getInstance();
         storageRef = storage.getReference();
 
-        Log.d(TAG, firebaseUser.toString());
         if (firebaseUser == null) {
             myStartActivity(SignUpActivity.class);
         } else {

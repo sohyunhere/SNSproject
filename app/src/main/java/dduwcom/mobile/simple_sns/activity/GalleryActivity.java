@@ -19,6 +19,9 @@ import java.util.ArrayList;
 import dduwcom.mobile.simple_sns.R;
 import dduwcom.mobile.simple_sns.adapter.GalleryAdapter;
 
+import static dduwcom.mobile.simple_sns.Util.GALLERY_IMAGE;
+import static dduwcom.mobile.simple_sns.Util.GALLERY_VIDEO;
+import static dduwcom.mobile.simple_sns.Util.INTENT_MEDIA;
 import static dduwcom.mobile.simple_sns.Util.showToast;
 
 public class GalleryActivity extends BasicActivity {
@@ -35,7 +38,7 @@ public class GalleryActivity extends BasicActivity {
 
             if (ActivityCompat.shouldShowRequestPermissionRationale(GalleryActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
             } else {
-                showToast(GalleryActivity.this, "권한을 허용해주세요.");
+                showToast(GalleryActivity.this, getResources().getString(R.string.please_grant_permission));
             }
 
         }else{
@@ -53,7 +56,7 @@ public class GalleryActivity extends BasicActivity {
                     recyclerinit();
                 } else {
                     finish();
-                    showToast(GalleryActivity.this, "권한을 허용해주세요.");
+                    showToast(GalleryActivity.this, getResources().getString(R.string.please_grant_permission));
                 }
         }
     }
@@ -81,7 +84,8 @@ public class GalleryActivity extends BasicActivity {
 
 
         Intent intent = getIntent();
-        if(intent.getStringExtra("media").equals("video")){
+        final int media = intent.getIntExtra(INTENT_MEDIA, GALLERY_IMAGE);
+        if(media == GALLERY_VIDEO){
 
             uri = android.provider.MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
             projection = new String[] {MediaStore.MediaColumns.DATA, MediaStore.Video.Media.BUCKET_DISPLAY_NAME };

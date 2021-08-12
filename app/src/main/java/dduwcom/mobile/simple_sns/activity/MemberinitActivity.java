@@ -35,6 +35,7 @@ import java.io.InputStream;
 import dduwcom.mobile.simple_sns.MemberInfo;
 import dduwcom.mobile.simple_sns.R;
 
+import static dduwcom.mobile.simple_sns.Util.INTENT_PATH;
 import static dduwcom.mobile.simple_sns.Util.showToast;
 
 public class MemberinitActivity extends BasicActivity {
@@ -50,7 +51,7 @@ public class MemberinitActivity extends BasicActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_member_init);
 
-        loaderLayout.findViewById(R.id.loaderLayout);
+        loaderLayout = findViewById(R.id.loaderLayout);
         profileImageView = findViewById(R.id.profileImageView);
         profileImageView.setOnClickListener(onClickListener);
 
@@ -90,8 +91,8 @@ public class MemberinitActivity extends BasicActivity {
         switch (requestCode){
             case 0:
                 if(resultCode == Activity.RESULT_OK){
-                    profilePath = data.getStringExtra("profilePath");
-                    Log.e("로그: ", "profilePath" + profilePath);
+                    profilePath = data.getStringExtra(INTENT_PATH);
+                    Log.e("로그: ", INTENT_PATH + profilePath);
 
                     Glide.with(this).load(profilePath).centerCrop().override(500).into(profileImageView);
                 }
