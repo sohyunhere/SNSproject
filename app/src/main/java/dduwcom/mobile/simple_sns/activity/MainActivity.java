@@ -28,6 +28,7 @@ import com.google.firebase.storage.StorageReference;
 import java.util.ArrayList;
 import java.util.Date;
 
+import dduwcom.mobile.simple_sns.FirebaseHelper;
 import dduwcom.mobile.simple_sns.PostInfo;
 import dduwcom.mobile.simple_sns.R;
 import dduwcom.mobile.simple_sns.adapter.MainAdapter;
@@ -43,18 +44,18 @@ public class MainActivity extends BasicActivity {
     private FirebaseFirestore firebaseFirestore;
     private MainAdapter mainAdapter;
     private ArrayList<PostInfo> postList;
-    private StorageReference storageRef;
-    private int successCount;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        setToolbarTitle(getResources().getString(R.string.app_name));
+
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
 
         FirebaseStorage storage = FirebaseStorage.getInstance();
-        storageRef = storage.getReference();
 
         if (firebaseUser == null) {
             myStartActivity(SignUpActivity.class);
@@ -101,43 +102,6 @@ public class MainActivity extends BasicActivity {
         postUpdate();
     }
 
-    OnPostListener onPostListener = new OnPostListener() {
-        @Override
-        public void onDelete(int position) {
-            final String id = postList.get(position).getId();
-            ArrayList<String> contentsList = postList.get(position).getContents();
-
-            for (int i = 0; i < contentsList.size(); i++) {
-                String contents = contentsList.get(i);
-                if (isStorageUri(contents)) {
-                    successCount++;
-
-                    StorageReference desertRef = storageRef.child("posts/" + id + "/" + storageUriToName(contents));
-
-                    desertRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                            successCount--;
-                            storeUpLoader(id);
-                        }
-                    }).addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception exception) {
-                            showToast(MainActivity.this, "삭제하지 못했습니다.");
-                        }
-                    });
-                }
-            }
-            storeUpLoader(id);
-        }
-
-        @Override
-        public void onModify(int position) {
-            myStartActivity(WritePostActivity.class, postList.get(position));
-        }
-
-    };
-
     View.OnClickListener onClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -150,6 +114,18 @@ public class MainActivity extends BasicActivity {
                     myStartActivity(WritePostActivity.class);
                     break;
             }
+        }
+    };
+    OnPostListener onPostListener = new OnPostListener() {
+        @Override
+        public void onDelete() {
+            postUpdate();
+            Log.e("로그: ", "삭제 성공");
+        }
+
+        @Override
+        public void onModify() {
+            Log.e("로그: ", "수정정 성공");
         }
     };
 
@@ -182,37 +158,12 @@ public class MainActivity extends BasicActivity {
         }
     }
 
-    private void storeUpLoader(String id) {
-        if (successCount == 0) {
-            firebaseFirestore.collection("posts").document(id)
-                    .delete()
-                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                            showToast(MainActivity.this, "게시글을 삭제하였습니다.");
-                            postUpdate();
-                        }
-                    })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(Exception e) {
-                            showToast(MainActivity.this, "게시글 삭제를 실패하였습니다.");
-                        }
-                    });
-        }
-    }
 
     private void myStartActivity(Class c) {
         Intent intent = new Intent(this, c);
 //        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 ////        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
 ////        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);   //로그인 성공후 뒤로가기 버튼을 클릭하면 앱 종료
-        startActivity(intent);
-    }
-
-    private void myStartActivity(Class c, PostInfo postInfo) {
-        Intent intent = new Intent(this, c);
-        intent.putExtra("postInfo", postInfo);
         startActivity(intent);
     }
 }

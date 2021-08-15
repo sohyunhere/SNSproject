@@ -30,6 +30,7 @@ public class GalleryActivity extends BasicActivity {
     protected void onCreate( Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_gallery);
+        setToolbarTitle("갤러리");
 
         if (ContextCompat.checkSelfPermission(
                 GalleryActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) !=

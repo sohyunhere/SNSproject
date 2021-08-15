@@ -52,18 +52,23 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryV
                 activity.finish();
             }
         });
+
         return galleryViewHolder;
     }
 
     @Override
     public void onBindViewHolder(GalleryViewHolder holder, int position) {
         CardView cardView = holder.cardView;
-
         ImageView imageView = cardView.findViewById(R.id.imageView);
 
         Glide.with(activity).load(mDataset.get(position)).centerCrop().override(500).into(imageView);
+
     }
 
+    @Override
+    public int getItemViewType(int position) {
+        return position;
+    }
     @Override
     public int getItemCount() {
         return mDataset.size();

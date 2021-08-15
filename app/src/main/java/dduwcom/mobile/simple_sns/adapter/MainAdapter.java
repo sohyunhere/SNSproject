@@ -20,18 +20,23 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Locale;
 
+import dduwcom.mobile.simple_sns.FirebaseHelper;
 import dduwcom.mobile.simple_sns.PostInfo;
 import dduwcom.mobile.simple_sns.R;
 import dduwcom.mobile.simple_sns.activity.PostActivity;
+import dduwcom.mobile.simple_sns.activity.WritePostActivity;
 import dduwcom.mobile.simple_sns.listener.OnPostListener;
+import dduwcom.mobile.simple_sns.view.ReadContentsView;
 
 import static dduwcom.mobile.simple_sns.Util.isStorageUri;
 
 
 public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder> {
 
+    private FirebaseHelper firebaseHelper;
     private ArrayList<PostInfo> mDataset;
     private Activity activity;
+    private final int MORE_INDEX = 2;
     private OnPostListener onPostListener;
 
     static class MainViewHolder extends RecyclerView.ViewHolder {
@@ -48,10 +53,11 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
     public MainAdapter(Activity activity, ArrayList<PostInfo> myDataset) {
         this.mDataset = myDataset;
         this.activity = activity;
+        firebaseHelper = new FirebaseHelper(activity);
     }
 
     public void setOnPostListener(OnPostListener onPostListener){
-        this.onPostListener = onPostListener;
+        firebaseHelper.setOnPostListener(onPostListener);
     }
 
     @Override
@@ -87,47 +93,19 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
         CardView cardView = holder.cardView;
 
         TextView titleTextView = cardView.findViewById(R.id.titleTextView);
-        titleTextView.setText(mDataset.get(position).getTitle());
+        PostInfo postInfo = mDataset.get(position);
+        titleTextView.setText(postInfo.getTitle());
 
-        TextView createdAtTextView = cardView.findViewById(R.id.createdAtTextView);
-        createdAtTextView.setText(new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(mDataset.get(position).getCreatedAt()));
+        ReadContentsView readContentsView = cardView.findViewById(R.id.readContentsView);
 
         LinearLayout contentsLayout = cardView.findViewById(R.id.contentsLayout);
 
-        ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        ArrayList<String> contentsList = mDataset.get(position).getContents();
-
-        if (contentsLayout.getTag() == null || !contentsLayout.getTag().equals(contentsList)) {
-            contentsLayout.setTag(contentsList);
+        if (contentsLayout.getTag() == null || !contentsLayout.getTag().equals(postInfo)) {
+            contentsLayout.setTag(postInfo);
             contentsLayout.removeAllViews();
-            final int MORE_INDEX = 2;
-            for (int i = 0; i < contentsList.size(); i++) {
-                if(i == MORE_INDEX){
-                    TextView textView = new TextView(activity);
-                    textView.setLayoutParams(layoutParams);
 
-                    textView.setText("더보기..");
-                    contentsLayout.addView(textView);
-                    break;
-                }
-
-                String contents = contentsList.get(i);
-                if (isStorageUri(contents)) {
-                    ImageView imageView = new ImageView(activity);
-                    imageView.setLayoutParams(layoutParams);
-                    imageView.setAdjustViewBounds(true);
-                    imageView.setScaleType(ImageView.ScaleType.FIT_XY);
-                    contentsLayout.addView(imageView);
-
-                    Glide.with(activity).load(contents).override(1000).thumbnail(0.1f).into(imageView);
-                } else {
-                    TextView textView = new TextView(activity);
-                    textView.setLayoutParams(layoutParams);
-                    contentsLayout.addView(textView);
-                    textView.setTextColor(Color.BLACK);
-                    textView.setText(contents);
-                }
-            }
+            readContentsView.setMoreIndex(MORE_INDEX);
+            readContentsView.setPostInfo(postInfo);
         }
     }
 
@@ -143,10 +121,10 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.modify:
-                        onPostListener.onModify(position);
+                        myStartActivity(WritePostActivity.class, mDataset.get(position));
                         return true;
                     case R.id.delete:
-                        onPostListener.onDelete(position);
+                        firebaseHelper.storageDelete(mDataset.get(position));
                         return true;
                     default:
                         return false;
@@ -158,4 +136,9 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
         popup.show();
     }
 
+    private void myStartActivity(Class c, PostInfo postInfo) {
+        Intent intent = new Intent(activity, c);
+        intent.putExtra("postInfo", postInfo);
+        activity.startActivity(intent);
+    }
 }

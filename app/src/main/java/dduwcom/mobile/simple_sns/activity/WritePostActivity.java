@@ -64,6 +64,8 @@ public class WritePostActivity extends BasicActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_write_post);
+        setToolbarTitle("게시글 작성");
+
         parent = findViewById(R.id.contentsLayout);
 
         btnsBackgroundLayout = findViewById(R.id.btnsBackgroundLayout);
@@ -216,6 +218,7 @@ public class WritePostActivity extends BasicActivity {
             FirebaseStorage storage = FirebaseStorage.getInstance();
             StorageReference storageRef = storage.getReference();
             user = FirebaseAuth.getInstance().getCurrentUser();
+            final ArrayList<String> formatList = new ArrayList<>();
             FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
 
             final DocumentReference documentReference = postInfo == null ? firebaseFirestore.collection("posts").document() : firebaseFirestore.collection("posts").document(postInfo.getId());
@@ -230,12 +233,24 @@ public class WritePostActivity extends BasicActivity {
                         String text = ((EditText) view).getText().toString();
                         if (text.length() > 0) {
                             contentsList.add(text);
+                            formatList.add("text");
                         }
                     } else if (!isStorageUri(pathList.get(pathCount))) {
-
                         String path = pathList.get(pathCount);
                         successCount++;
                         contentsList.add(path);
+
+                        String[] okFileExtensions =  new String[] {"jpg", "png", "gif","jpeg"};
+                        for(int j = 0; j < okFileExtensions.length; j++){
+                            if(path.contains(okFileExtensions[j])){
+                                formatList.add("image");
+                                break;
+                            }
+                            if(j == okFileExtensions.length - 1){
+                                formatList.add("video");
+                            }
+                        }
+
                         String[] pathArray = path.split("\\.");
                         final StorageReference mountainImagesRef = storageRef.child("posts/" + documentReference.getId() + "/" + pathCount + "." + pathArray[pathArray.length - 1]);
                         try {
@@ -285,13 +300,17 @@ public class WritePostActivity extends BasicActivity {
         }
     }
 
-    private void storeUpload(DocumentReference documentReference, PostInfo postInfo) {
+    private void storeUpload(DocumentReference documentReference, final PostInfo postInfo) {
         documentReference.set(postInfo.getPostInfo())
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
                         Log.d(TAG, "DocumentSnapshot successfully written!");
                         loaderLayout.setVisibility(View.GONE);
+                        Intent resultIntent = new Intent();
+                        resultIntent.putExtra("postInfo", postInfo);
+                        setResult(Activity.RESULT_OK, resultIntent);
+
                         finish();
                     }
                 })
