@@ -45,6 +45,7 @@ public class MemberinitActivity extends BasicActivity {
     private String profilePath;
     private FirebaseUser user;
     private RelativeLayout loaderLayout;
+    private RelativeLayout btnsBackgroundLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,12 +55,14 @@ public class MemberinitActivity extends BasicActivity {
 
         loaderLayout = findViewById(R.id.loaderLayout);
         profileImageView = findViewById(R.id.profileImageView);
+        btnsBackgroundLayout = findViewById(R.id.btnsBackgroundLayout);
+        btnsBackgroundLayout.setOnClickListener(onClickListener);
         profileImageView.setOnClickListener(onClickListener);
 
         findViewById(R.id.checkBtn).setOnClickListener(onClickListener);
         findViewById(R.id.imageModify).setOnClickListener(onClickListener);
         findViewById(R.id.videoModify).setOnClickListener(onClickListener);
-
+        btnsBackgroundLayout.setVisibility(View.GONE);
     }
 
     View.OnClickListener onClickListener = new View.OnClickListener() {
@@ -70,11 +73,10 @@ public class MemberinitActivity extends BasicActivity {
                     storageUploader();
                     break;
                 case R.id.profileImageView:
-                    CardView cardView = findViewById(R.id.btnsCardView);
-                    if (cardView.getVisibility() == View.VISIBLE)
-                        cardView.setVisibility(View.GONE);
-                    else
-                        cardView.setVisibility(View.VISIBLE);
+                    btnsBackgroundLayout.setVisibility(View.VISIBLE);
+                    break;
+                case R.id.btnsBackgroundLayout:
+                    btnsBackgroundLayout.setVisibility(View.GONE);
                     break;
                 case R.id.imageModify:
                     myStartActivity(CameraActivity.class);

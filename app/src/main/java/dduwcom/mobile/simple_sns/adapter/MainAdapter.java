@@ -37,7 +37,6 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
     private ArrayList<PostInfo> mDataset;
     private Activity activity;
     private final int MORE_INDEX = 2;
-    private OnPostListener onPostListener;
 
     static class MainViewHolder extends RecyclerView.ViewHolder {
 

@@ -41,7 +41,9 @@ import static dduwcom.mobile.simple_sns.Util.GALLERY_IMAGE;
 import static dduwcom.mobile.simple_sns.Util.GALLERY_VIDEO;
 import static dduwcom.mobile.simple_sns.Util.INTENT_MEDIA;
 import static dduwcom.mobile.simple_sns.Util.INTENT_PATH;
+import static dduwcom.mobile.simple_sns.Util.isImageFile;
 import static dduwcom.mobile.simple_sns.Util.isStorageUri;
+import static dduwcom.mobile.simple_sns.Util.isVideoFile;
 import static dduwcom.mobile.simple_sns.Util.showToast;
 import static dduwcom.mobile.simple_sns.Util.storageUriToName;
 
@@ -178,23 +180,29 @@ public class WritePostActivity extends BasicActivity {
 
                 case R.id.delete:
                     final View selectedView = (View) selectedImageView.getParent();
+                    String path = pathList.get(parent.indexOfChild(selectedView) - 1);
+                    if(isStorageUri(path)){
+                        StorageReference desertRef = storageRef.child("posts/" + postInfo.getId() + "/" + storageUriToName(path));
 
-                    StorageReference desertRef = storageRef.child("posts/" + postInfo.getId() + "/" + storageUriToName(pathList.get(parent.indexOfChild(selectedView) - 1)));
-
-                    desertRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                            showToast(WritePostActivity.this, "파일 삭제 성공");
-                            pathList.remove(parent.indexOfChild(selectedView) - 1);
-                            parent.removeView(selectedView);
-                            btnsBackgroundLayout.setVisibility(View.GONE);
-                        }
-                    }).addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception exception) {
-                            showToast(WritePostActivity.this, "삭제하지 못했습니다.");
-                        }
-                    });
+                        desertRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                showToast(WritePostActivity.this, "파일 삭제 성공");
+                                pathList.remove(parent.indexOfChild(selectedView) - 1);
+                                parent.removeView(selectedView);
+                                btnsBackgroundLayout.setVisibility(View.GONE);
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception exception) {
+                                showToast(WritePostActivity.this, "삭제하지 못했습니다.");
+                            }
+                        });
+                    }else{
+                        pathList.remove(parent.indexOfChild(selectedView) - 1);
+                        parent.removeView(selectedView);
+                        btnsBackgroundLayout.setVisibility(View.GONE);
+                    }
                     break;
             }
         }
@@ -214,11 +222,11 @@ public class WritePostActivity extends BasicActivity {
 
         if (title.length() > 0) {
             loaderLayout.setVisibility(View.VISIBLE);
-            final ArrayList<String> contentsList = new ArrayList<String>();
+            final ArrayList<String> contentsList = new ArrayList<>();
+            final ArrayList<String> formatList = new ArrayList<>();
             FirebaseStorage storage = FirebaseStorage.getInstance();
             StorageReference storageRef = storage.getReference();
             user = FirebaseAuth.getInstance().getCurrentUser();
-            final ArrayList<String> formatList = new ArrayList<>();
             FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
 
             final DocumentReference documentReference = postInfo == null ? firebaseFirestore.collection("posts").document() : firebaseFirestore.collection("posts").document(postInfo.getId());
@@ -240,15 +248,22 @@ public class WritePostActivity extends BasicActivity {
                         successCount++;
                         contentsList.add(path);
 
-                        String[] okFileExtensions =  new String[] {"jpg", "png", "gif","jpeg"};
-                        for(int j = 0; j < okFileExtensions.length; j++){
-                            if(path.contains(okFileExtensions[j])){
-                                formatList.add("image");
-                                break;
-                            }
-                            if(j == okFileExtensions.length - 1){
-                                formatList.add("video");
-                            }
+//                        String[] okFileExtensions =  new String[] {"jpg", "png", "gif","jpeg"};
+//                        for(int j = 0; j < okFileExtensions.length; j++){
+//                            if(path.contains(okFileExtensions[j])){
+//                                formatList.add("image");
+//                                break;
+//                            }
+//                            if(j == okFileExtensions.length - 1){
+//                                formatList.add("video");
+//                            }
+//                        }
+                        if(isImageFile(path)){
+                            formatList.add("image");
+                        }else if(isVideoFile(path)){
+                            formatList.add("video");
+                        }else{
+                            formatList.add("text");
                         }
 
                         String[] pathArray = path.split("\\.");
@@ -277,7 +292,7 @@ public class WritePostActivity extends BasicActivity {
 
                                             if (successCount == 0) {
                                                 //완료
-                                                PostInfo postInfo = new PostInfo(title, contentsList, user.getUid(), date);
+                                                PostInfo postInfo = new PostInfo(title, contentsList, formatList, user.getUid(), date);
                                                 storeUpload(documentReference, postInfo);
                                             }
                                         }
@@ -293,7 +308,7 @@ public class WritePostActivity extends BasicActivity {
                 }
             }
             if (successCount == 0) {
-                storeUpload(documentReference, new PostInfo(title, contentsList, user.getUid(), date));
+                storeUpload(documentReference, new PostInfo(title, contentsList, formatList, user.getUid(), date));
             }
         } else {
             startToast("게시물 제목을 입력해주세요");

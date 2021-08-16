@@ -3,7 +3,8 @@
     android:id="@+id/loaderLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#5B807F7F">
+    android:background="#5B807F7F"
+    android:clickable="true">
 
     <ProgressBar
         android:id="@+id/progressBar"
