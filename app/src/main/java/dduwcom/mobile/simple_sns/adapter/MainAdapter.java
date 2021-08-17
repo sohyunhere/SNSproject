@@ -16,6 +16,8 @@ import androidx.appcompat.widget.PopupMenu;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
+import com.google.android.exoplayer2.SimpleExoPlayer;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Locale;
@@ -37,6 +39,7 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
     private ArrayList<PostInfo> mDataset;
     private Activity activity;
     private final int MORE_INDEX = 2;
+    private ArrayList<ArrayList<SimpleExoPlayer>> playerArrayArrrayList = new ArrayList<>();
 
     static class MainViewHolder extends RecyclerView.ViewHolder {
 
@@ -105,6 +108,12 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
 
             readContentsView.setMoreIndex(MORE_INDEX);
             readContentsView.setPostInfo(postInfo);
+
+            ArrayList<SimpleExoPlayer> playerArrayList = readContentsView.getPlayerArrayList();
+            if(playerArrayList != null) {
+                playerArrayArrrayList.add(playerArrayList);
+            }
+
         }
     }
 
@@ -139,5 +148,16 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
         Intent intent = new Intent(activity, c);
         intent.putExtra("postInfo", postInfo);
         activity.startActivity(intent);
+    }
+    public void playerStop(){
+        for(int i = 0; i < playerArrayArrrayList.size(); i++){
+            ArrayList<SimpleExoPlayer> playerArrayList = playerArrayArrrayList.get(i);
+            for(int ii = 0; ii < playerArrayList.size(); ii++){
+                SimpleExoPlayer player = playerArrayList.get(ii);
+                if(player.getPlayWhenReady()){
+                    player.setPlayWhenReady(false);
+                }
+            }
+        }
     }
 }

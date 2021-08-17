@@ -32,7 +32,7 @@ public class ReadContentsView extends LinearLayout {
     private LayoutInflater layoutInflater;
     private Context context;
     private int moreIndex = -1;
-    private SimpleExoPlayer player;
+    private ArrayList<SimpleExoPlayer> playerArrayList = new ArrayList<>();
 
     public ReadContentsView(Context context) {
         super(context);
@@ -53,7 +53,6 @@ public class ReadContentsView extends LinearLayout {
 
         layoutInflater = (LayoutInflater)getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         layoutInflater.inflate(R.layout.view_post, this, true);
-        player = new SimpleExoPlayer.Builder(context).build();
     }
 
     public void setMoreIndex(int moreIndex){
@@ -89,6 +88,7 @@ public class ReadContentsView extends LinearLayout {
 
                 MediaItem mediaItem = MediaItem.fromUri(Uri.parse(contents));
 
+                SimpleExoPlayer player = new SimpleExoPlayer.Builder(context).build();
                 player.setMediaItem(mediaItem);
                 player.prepare();
                 player.play();
@@ -100,6 +100,8 @@ public class ReadContentsView extends LinearLayout {
                     }
                 });
 
+                playerArrayList.add(player);
+
                 playerView.setPlayer(player);
                 contentsLayout.addView(playerView);
             }else{
@@ -108,5 +110,9 @@ public class ReadContentsView extends LinearLayout {
                 contentsLayout.addView(textView);
             }
         }
+    }
+
+    public ArrayList<SimpleExoPlayer> getPlayerArrayList() {
+        return playerArrayList;
     }
 }

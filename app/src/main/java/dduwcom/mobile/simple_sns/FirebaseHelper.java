@@ -31,7 +31,7 @@ public class FirebaseHelper {
     public void setOnPostListener(OnPostListener onPostListener){
         this.onPostListener = onPostListener;
     }
-    public void storageDelete(PostInfo postInfo){
+    public void storageDelete(final PostInfo postInfo){
         FirebaseStorage storage = FirebaseStorage.getInstance();
         StorageReference storageRef = storage.getReference();
         final String id = postInfo.getId();
@@ -48,7 +48,7 @@ public class FirebaseHelper {
                     @Override
                     public void onSuccess(Void aVoid) {
                         successCount--;
-                        storeDelete(id);
+                        storeDelete(id, postInfo);
                     }
                 }).addOnFailureListener(new OnFailureListener() {
                     @Override
@@ -58,10 +58,10 @@ public class FirebaseHelper {
                 });
             }
         }
-        storeDelete(id);
+        storeDelete(id, postInfo);
     }
 
-    public void storeDelete(String id) {
+    public void storeDelete(String id, final PostInfo postInfo) {
 
         FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
         if (successCount == 0) {
@@ -71,7 +71,7 @@ public class FirebaseHelper {
                         @Override
                         public void onSuccess(Void aVoid) {
                             showToast(activity, "게시글을 삭제하였습니다.");
-                            onPostListener.onDelete();
+                            onPostListener.onDelete(postInfo);
                            // postUpdate();
                         }
                     })
