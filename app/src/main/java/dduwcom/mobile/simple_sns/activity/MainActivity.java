@@ -1,58 +1,35 @@
 package dduwcom.mobile.simple_sns.activity;
 
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
-import android.widget.ImageView;
+import android.view.MenuItem;
 
-import com.bumptech.glide.Glide;
+import androidx.annotation.NonNull;
+
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Query;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Date;
-
-import dduwcom.mobile.simple_sns.FirebaseHelper;
-import dduwcom.mobile.simple_sns.PostInfo;
 import dduwcom.mobile.simple_sns.R;
-import dduwcom.mobile.simple_sns.adapter.MainAdapter;
-import dduwcom.mobile.simple_sns.listener.OnPostListener;
-import dduwcom.mobile.simple_sns.view.ContentsItemView;
-
-import static dduwcom.mobile.simple_sns.Util.INTENT_PATH;
-import static dduwcom.mobile.simple_sns.Util.isStorageUri;
-import static dduwcom.mobile.simple_sns.Util.showToast;
-import static dduwcom.mobile.simple_sns.Util.storageUriToName;
+import dduwcom.mobile.simple_sns.UserInfo;
+import dduwcom.mobile.simple_sns.fragment.Camera2BasicFragment;
+import dduwcom.mobile.simple_sns.fragment.HomeFragment;
+import dduwcom.mobile.simple_sns.fragment.UserInfoFragment;
+import dduwcom.mobile.simple_sns.fragment.UserListFragment;
 
 public class MainActivity extends BasicActivity {
-    private static final String TAG = "MainActivity";
     private FirebaseUser firebaseUser;
     private FirebaseFirestore firebaseFirestore;
-    private MainAdapter mainAdapter;
-    private ArrayList<PostInfo> postList;
-    private boolean updating;
-    private boolean topScrolled;
+    private static final String TAG = "MainActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,15 +38,38 @@ public class MainActivity extends BasicActivity {
 
         setToolbarTitle(getResources().getString(R.string.app_name));
 
-        firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        init();
 
-        FirebaseStorage storage = FirebaseStorage.getInstance();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode) {
+            case 1:
+                init();
+                break;
+        }
+    }
+
+    private void init(){
+        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        firebaseFirestore = FirebaseFirestore.getInstance();
 
         if (firebaseUser == null) {
             myStartActivity(SignUpActivity.class);
         } else {
-
-            firebaseFirestore = FirebaseFirestore.getInstance();
             DocumentReference documentReference = firebaseFirestore.collection("users").document(firebaseUser.getUid());
             documentReference.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                 @Override
@@ -91,147 +91,45 @@ public class MainActivity extends BasicActivity {
                     }
                 }
             });
-        }
-        postList = new ArrayList<>();
-        mainAdapter = new MainAdapter(MainActivity.this, postList);
-        mainAdapter.setOnPostListener(onPostListener);
+            HomeFragment homeFragment = new HomeFragment();
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.container, homeFragment)
+                    .commit();
 
-        RecyclerView recyclerView = findViewById(R.id.recyclerView);
-        findViewById(R.id.floatingActionButton).setOnClickListener(onClickListener);
-
-        recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
-        recyclerView.setAdapter(mainAdapter);
-        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(@NonNull @NotNull RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView, newState);
-
-                RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
-                int firstVisibleItemPosition = ((LinearLayoutManager)layoutManager).findFirstVisibleItemPosition();
-
-                if(newState == 1 && firstVisibleItemPosition == 0){
-                    topScrolled = true;
+            BottomNavigationView bottomNavigationView = findViewById(R.id.bottomNavigationView);
+            bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+                @Override
+                public boolean onNavigationItemSelected(@NonNull @NotNull MenuItem item) {
+                    switch (item.getItemId()){
+                        case R.id.home:
+                            HomeFragment homeFragment = new HomeFragment();
+                            getSupportFragmentManager().beginTransaction()
+                                    .replace(R.id.container, homeFragment)
+                                    .commit();
+                            return true;
+                        case R.id.userList:
+                            UserListFragment userListFragment = new UserListFragment();
+                            getSupportFragmentManager().beginTransaction()
+                                    .replace(R.id.container, userListFragment)
+                                    .commit();
+                            return true;
+                        case R.id.myInfo:
+                            UserInfoFragment userInfoFragment = new UserInfoFragment();
+                            getSupportFragmentManager().beginTransaction()
+                                    .replace(R.id.container, userInfoFragment)
+                                    .commit();
+                            return true;
+                    }
+                    return false;
                 }
-                if(newState == 0 && topScrolled){
-                    postList.clear();
-                    postUpdate();
-                    topScrolled = false;
-                }
-            }
-
-            @Override
-            public void onScrolled(@NonNull @NotNull RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
-
-                RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
-                int visibleItemCount = layoutManager.getChildCount();
-                int totalItemCount = layoutManager.getItemCount();
-                int firstVisibleItemPosition = ((LinearLayoutManager)layoutManager).findFirstVisibleItemPosition();
-                int lastVisibleItemPosition = ((LinearLayoutManager)layoutManager).findLastVisibleItemPosition();
-
-                if(totalItemCount - 3 <= lastVisibleItemPosition && !updating){
-                    postUpdate();
-                }
-                if(0 < firstVisibleItemPosition){
-                    topScrolled = false;
-                }
-            }
-        });
-        postUpdate();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        mainAdapter.playerStop();
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        switch (requestCode) {
-            case 0:
-                if(data != null){
-                    postUpdate();
-                }
-                break;
+            });
         }
     }
-
-    View.OnClickListener onClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            switch (v.getId()) {
-//                case R.id.logoutBtn:
-//                    FirebaseAuth.getInstance().signOut();
-//                    myStartActivity(SignUpActivity.class);
-//                    break;
-                case R.id.floatingActionButton:
-                    myStartActivity(WritePostActivity.class);
-                    break;
-            }
-        }
-    };
-    OnPostListener onPostListener = new OnPostListener() {
-        @Override
-        public void onDelete(PostInfo postInfo) {
-            postList.remove(postInfo);
-            mainAdapter.notifyDataSetChanged();
-
-            Log.e("로그: ", "삭제 성공");
-        }
-
-        @Override
-        public void onModify() {
-            Log.e("로그: ", "수정정 성공");
-        }
-    };
-
-    private void postUpdate() {
-        if (firebaseUser != null) {
-            updating = true;
-            Date date = postList.size() == 0 ? new Date() : postList.get(postList.size() - 1).getCreatedAt();
-            CollectionReference collectionReference = firebaseFirestore.collection("posts");
-
-            collectionReference.orderBy("createdAt", Query.Direction.DESCENDING).whereLessThan("createdAt", date).limit(10)
-                    .get()
-                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                        @Override
-                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                            if (task.isSuccessful()) {
-
-                                for (QueryDocumentSnapshot document : task.getResult()) {
-                                    Log.d(TAG, document.getId() + " => " + document.getData());
-                                    postList.add(new PostInfo(document.getData().get("title").toString(),
-                                            (ArrayList<String>) document.getData().get("contents"),
-                                            (ArrayList<String>) document.getData().get("formats"),
-                                            document.getData().get("publisher").toString(),
-                                            new Date(document.getDate("createdAt").getTime()),
-                                            document.getId()));
-                                }
-                                mainAdapter.notifyDataSetChanged();
-                            } else {
-                                Log.d(TAG, "Error getting documents: ", task.getException());
-                            }
-                            updating = false;
-                        }
-                    });
-        }
-    }
-
-
     private void myStartActivity(Class c) {
         Intent intent = new Intent(this, c);
 //        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 ////        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
 ////        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);   //로그인 성공후 뒤로가기 버튼을 클릭하면 앱 종료
-        startActivityForResult(intent, 0);
+        startActivityForResult(intent, 1);
     }
 }

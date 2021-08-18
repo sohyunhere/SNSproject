@@ -2,25 +2,20 @@ package dduwcom.mobile.simple_sns.adapter;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.Color;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
-import com.bumptech.glide.Glide;
+
 import com.google.android.exoplayer2.SimpleExoPlayer;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Locale;
 
 import dduwcom.mobile.simple_sns.FirebaseHelper;
 import dduwcom.mobile.simple_sns.PostInfo;
@@ -30,10 +25,8 @@ import dduwcom.mobile.simple_sns.activity.WritePostActivity;
 import dduwcom.mobile.simple_sns.listener.OnPostListener;
 import dduwcom.mobile.simple_sns.view.ReadContentsView;
 
-import static dduwcom.mobile.simple_sns.Util.isStorageUri;
 
-
-public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder> {
+public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.MainViewHolder> {
 
     private FirebaseHelper firebaseHelper;
     private ArrayList<PostInfo> mDataset;
@@ -52,7 +45,7 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
         }
     }
 
-    public MainAdapter(Activity activity, ArrayList<PostInfo> myDataset) {
+    public HomeAdapter(Activity activity, ArrayList<PostInfo> myDataset) {
         this.mDataset = myDataset;
         this.activity = activity;
         firebaseHelper = new FirebaseHelper(activity);
